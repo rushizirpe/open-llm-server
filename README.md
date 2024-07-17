@@ -1,10 +1,11 @@
 
 # FastAPI Endpoints API
 
+![Docker](https://img.shields.io/badge/Docker-ffffff?style=flat&logo=docker)
+![Python](https://img.shields.io/badge/Python-3670A0?style=flat&logo=python&logoColor=ffdd54)
+![Licence](https://img.shields.io/github/license/rushizirpe/open-llm-server)
+![Issues](https://img.shields.io/github/issues/rushizirpe/open-llm-server)
 ![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=flat&logo=fastapi)
-![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker)
-![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python)
-
 
 This repository contains a FastAPI application for generating text embeddings and chat completions using models from Hugging Face's Transformers library and the LLaMA model from Meta AI.
 
