@@ -26,20 +26,20 @@ The application leverages pre-trained models from Hugging Face and the LLaMA mod
 ### Clone the Repository
 
 ```sh
-git clone https://github.com/rushizirpe/embed-api.git
-cd embed-api
+git clone https://github.com/rushizirpe/open-llm-server.git
+cd open-llm-server
 ```
 
 ### Build the Docker Image
 
 ```sh
-docker build -t embed-api .
+docker build -t open-llm-server .
 ```
 
 ### Run the Docker Container
 
 ```sh
-docker run -it -p 1234:1234 embed-api:latest
+docker run -it -p 8888:8888 open-llm-server:latest
 ```
 
 ## Endpoints
@@ -131,7 +131,7 @@ pip install -r requirements.txt
 ### Run Locally
 
 ```sh
-uvicorn app:app --host 0.0.0.0 --port 1234
+uvicorn app:app --host 0.0.0.0 --port 8888
 ```
 
 ## License
@@ -144,22 +144,4 @@ Contributions are welcome! Please open an issue or submit a pull request for any
 
 ## Contact
 
-For any inquiries or support, please contact [Your Name](mailto:your.email@example.com).
-
-```
-
-### Adding Visuals
-
-To make the README more graphical, you can add badges, images, and even screenshots of your application if applicable. Here's how you can add a badge and an image:
-
-- **Badge**: Use Markdown syntax to include badges.
-  ```markdown
-  ![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=flat&logo=fastapi)
-  ```
-
-- **Image**: Use the `![alt text](image URL)` syntax to include images.
-  ```markdown
-  ![Screenshot](https://path.to/your/screenshot.png)
-  ```
-
-Replace the placeholder text (e.g., `your.email@example.com`, `Your Name`, etc.) with your actual information. You can also add more detailed sections if needed, such as a "Troubleshooting" section or "Acknowledgements."
+For any inquiries or support, please contact [me](mailto:zirperishi@gmail.com).
