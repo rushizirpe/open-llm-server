@@ -1,105 +1,101 @@
 
-# FastAPI Endpoints API
 
-![Docker](https://img.shields.io/badge/Docker-ffffff?style=flat&logo=docker)
-![Python](https://img.shields.io/badge/Python-3670A0?style=flat&logo=python&logoColor=ffdd54)
-![Licence](https://img.shields.io/github/license/rushizirpe/open-llm-server)
-![Issues](https://img.shields.io/github/issues/rushizirpe/open-llm-server)
-![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=flat&logo=fastapi)
+![Docker](https://img.shields.io/badge/Docker-ffffff?style=for-the-badge&logo=docker)&nbsp;&nbsp;
+![Python](https://img.shields.io/badge/Python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)&nbsp;&nbsp;
+![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)&nbsp;&nbsp;
+![Git](https://img.shields.io/badge/Git-grey?style=for-the-badge&logo=git)&nbsp;&nbsp;
+![Licence](https://img.shields.io/github/license/rushizirpe/open-llm-server?style=for-the-badge&)&nbsp;&nbsp;
+![Issues](https://img.shields.io/github/issues/rushizirpe/open-llm-server?style=for-the-badge&)&nbsp;&nbsp;
 
-This repository contains a FastAPI application for generating text embeddings and chat completions using models from Hugging Face's Transformers library and the LLaMA model from Meta AI.
+# Open LLM
 
-# Overview
+This Open LLM Framework serves as a powerful and flexible tool for generating text embeddings and chat completions using state-of-the-art and open source language models. By leveraging models Transformers, this enables various natural language processing (NLP) tasks to be performed via simple HTTP endpoints similar to openai endpoints.
 
-The FastAPI application provides endpoints for:
-- Generating embeddings for input texts.
-- Generating chat completions based on conversation history.
 
-The application leverages pre-trained models from Hugging Face and the LLaMA model for these tasks.
+### 
 
-# Setup
+- Provides an easy-to-use API interface to leverage powerful NLP models locally without needing deep expertise in machine learning.
 
-### Prerequisites
+- {TD - Allow integration with various applications, including chatbots, content creation tools, and recommendation systems.}
+- Supports multiple models from Transformers library, enabling diverse NLP tasks.
+- Utilizes GPU acceleration when available to enhance processing speed and efficiency.
+- Tunneling to give access to other endpoints
+- Reduces dependency on external APIs, potentially lowering operational costs.
+- Enables control over the computational resources used, optimizing for cost and performance.
 
-- Python
-- Docker
-- Git
+&zwj;
 
-## Source
+# **Usage**
+- ### Prerequisites
 
-### Clone the Repository
+    - Python >= 3.10
+    - Docker >= 23.0.3
+
+-  ### Source
 
 ```sh
+# Clone the Repository
 git clone https://github.com/rushizirpe/open-llm-server.git
+
+# Install Dependencies
 cd open-llm-server
+pip install -r requirements.txt
+
+#  Launch server
+python launch.py start --host 0.0.0.0 --port 8888 --reload
 ```
 
-### Build the Docker Image
-
+-  ### DockerHub
 ```sh
-docker build -t open-llm-server .
-```
+# Fetch Docker Image
+docker pull thisisrishi/open-llm-server
 
-### Run the Docker Container
-
-```sh
+# Run Docker
 docker run -it -p 8888:8888 open-llm-server:latest
 ```
-## From DockerHub
-### Fetch Docker Image
+&zwj;
+# **Endpoints**
+
+- ## **Health Check**
+
+    - **URL**: `/`
+    - **Method**: `GET`
+    - **Description**: Check the status of the API and the availability of a GPU.
+
+- **Usage**
 ```sh
-docker pull thisisrishi/embedding-endpoint
-```
-
-### Run the Docker Container
-
-```sh
-docker run -it -p 8888:8888 embedding-endpoint:latest
-```
-
-## Endpoints
-
-### Health Check
-
-- **URL**: `/`
-- **Method**: `GET`
-- **Description**: Check the status of the API and the availability of a GPU.
-
-**Usage**
-```
 curl http://localhost:8888/
 ```
-**Response**:
+- **Response**:
 ```json
 {
-    "status": "I am ALIVE!",
-    "gpu": "Available"
+    "status": "System Status: Operational",
+    "gpu": "Available",
+    "gpu_details": {
+        "GPU 0": {
+            "compute_capability": (8, 9),
+            "device_name": "NVIDIA L4"
+            }
+    }
 }
+
 ```
 
-### Generate Embeddings
+- ## **Embeddings**
 
-- **URL**: `/v1/embeddings`
-- **Method**: `POST`
-- **Description**: Generate embeddings for a list of input texts using a specified model.
+    - **URL**: `/v1/embeddings`
+    - **Method**: `POST`
+    - **Description**: Generate embeddings for a list of input texts using a specified model.
 
-**Request Body**:
-```json
-{
-    "input": ["Hello world", "How are you?"],
-    "model": "nomic-ai/nomic-embed-text-v1.5"
-}
-```
-
-**Usage**
-```
+- **Usage**
+```sh
 curl http://localhost:8888/v1/embeddings \
     -H "Content-Type: application/json" \
-    -H "Authorization: Bearer lm-studio"  \
+    -H "Authorization: Bearer DUMMY_KEY"  \
     -d '{"input": "the quick brown fox", "model": "nomic-ai/nomic-embed-text-v1.5"}' 
 ```
 
-**Response**:
+- **Response**:
 ```json
 {
     "object": "list",
@@ -112,37 +108,38 @@ curl http://localhost:8888/v1/embeddings \
 }
 ```
 
-### Generate Chat Completions
+- ## **Chat Completions**
 
-- **URL**: `/v1/chat/completions`
-- **Method**: `POST`
-- **Description**: Generate chat completions based on conversation history using a specified model.
+    - **URL**: `/v1/chat/completions`
+    - **Method**: `POST`
+    - **Description**: Generate chat completions based on conversation history using a specified model.
 
-**Request Body**:
+
+- **Request Body**:
 ```json
 {
-    "model": "gpt-2",
+    "model": "openai-community/gpt2",
     "messages": [
-        {"role": "user", "content": "Hello"},
+        {"role": "user", "content": "Hi!"},
         {"role": "assistant", "content": "Hi there! How can I help you today?"}
     ],
     "max_tokens": 150,
-    "temperature": 1.0,
+    "temperature": 0.7,
     "top_p": 1.0,
     "n": 1,
     "stop": null
 }
 ```
 
-**Usage**
-```
+- **Usage**
+```sh
 curl http://localhost:8888/v1/chat/completions \
     -H "Content-Type: application/json" \
-    -H "Authorization: Bearer lm-studio" \
-    -d '{"model": "openai-community/gpt2","messages": [{"role": "user", "content": "Hi!"}],"max_tokens": 50,"temperature": 0.7}'
+    -H "Authorization: Bearer DUMMY_KEY" \
+    -d '{"model": "openai-community/gpt2","messages": [{"role": "user", "content": "Hi!"}],"max_tokens": 150,"temperature": 0.7}'
 ```
 
-**Example Response**:
+- **Response**:
 ```json
 {
     "choices": [
@@ -151,32 +148,14 @@ curl http://localhost:8888/v1/chat/completions \
 }
 ```
 
-## Development
-
-### Install Dependencies
-
-Create a virtual environment and install the dependencies:
-
-```sh
-conda create --name endpoints-api python=3.10
-conda activate endpoints-api
-pip install -r requirements.txt
-```
-
-### Run Locally
-
-```sh
-uvicorn app:app --host 0.0.0.0 --port 8888
-```
-
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
+&nbsp;&nbsp; This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
 
 ## Contributing
 
-Contributions are welcome! Please open an issue or submit a pull request for any improvements or bug fixes.
+&nbsp;&nbsp;Contributions are welcome! Please open an issue or submit a pull request for any improvements or bug fixes.
 
 ## Contact
 
-For any inquiries or support, please contact [me](mailto:zirperishi@gmail.com).
+&nbsp;&nbsp;For any inquiries or support, please [contact me](mailto:zirperishi@gmail.com).
