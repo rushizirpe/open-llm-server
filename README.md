@@ -1,14 +1,14 @@
 
-# FastAPI Embed API
+# FastAPI Endpoints API
 
 ![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=flat&logo=fastapi)
 ![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker)
 ![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python)
-![Transformers](https://img.shields.io/badge/Transformers-FFD700?style=flat&logo=transformers)
+
 
 This repository contains a FastAPI application for generating text embeddings and chat completions using models from Hugging Face's Transformers library and the LLaMA model from Meta AI.
 
-## Overview
+# Overview
 
 The FastAPI application provides endpoints for:
 - Generating embeddings for input texts.
@@ -16,12 +16,15 @@ The FastAPI application provides endpoints for:
 
 The application leverages pre-trained models from Hugging Face and the LLaMA model for these tasks.
 
-## Setup
+# Setup
 
 ### Prerequisites
 
+- Python
 - Docker
 - Git
+
+## Source
 
 ### Clone the Repository
 
@@ -41,6 +44,17 @@ docker build -t open-llm-server .
 ```sh
 docker run -it -p 8888:8888 open-llm-server:latest
 ```
+## From DockerHub
+### Fetch Docker Image
+```sh
+docker pull thisisrishi/embedding-endpoint
+```
+
+### Run the Docker Container
+
+```sh
+docker run -it -p 8888:8888 embedding-endpoint:latest
+```
 
 ## Endpoints
 
@@ -50,7 +64,11 @@ docker run -it -p 8888:8888 open-llm-server:latest
 - **Method**: `GET`
 - **Description**: Check the status of the API and the availability of a GPU.
 
-**Example Response**:
+**Usage**
+```
+curl http://localhost:8888/
+```
+**Response**:
 ```json
 {
     "status": "I am ALIVE!",
@@ -68,11 +86,19 @@ docker run -it -p 8888:8888 open-llm-server:latest
 ```json
 {
     "input": ["Hello world", "How are you?"],
-    "model": "bert-base-uncased"
+    "model": "nomic-ai/nomic-embed-text-v1.5"
 }
 ```
 
-**Example Response**:
+**Usage**
+```
+curl http://localhost:8888/v1/embeddings \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer lm-studio"  \
+    -d '{"input": "the quick brown fox", "model": "nomic-ai/nomic-embed-text-v1.5"}' 
+```
+
+**Response**:
 ```json
 {
     "object": "list",
@@ -80,7 +106,7 @@ docker run -it -p 8888:8888 open-llm-server:latest
         {"embedding": [...], "index": 0},
         {"embedding": [...], "index": 1}
     ],
-    "model": "bert-base-uncased",
+    "model": "nomic-ai/nomic-embed-text-v1.5",
     "usage": {"total_tokens": 5}
 }
 ```
@@ -105,6 +131,14 @@ docker run -it -p 8888:8888 open-llm-server:latest
     "n": 1,
     "stop": null
 }
+```
+
+**Usage**
+```
+curl http://localhost:8888/v1/chat/completions \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer lm-studio" \
+    -d '{"model": "openai-community/gpt2","messages": [{"role": "user", "content": "Hi!"}],"max_tokens": 50,"temperature": 0.7}'
 ```
 
 **Example Response**:
