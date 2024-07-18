@@ -52,3 +52,54 @@ def status_gpu_check():
         "gpu_details": gpu_details
     }
 
+
+model_cache = {}
+
+def get_model_and_tokenizer(model_name: str):
+    if model_name not in model_cache:
+        tokenizer = AutoTokenizer.from_pretrained(model_name)
+        model = AutoModelForCausalLM.from_pretrained(model_name)
+        model_cache[model_name] = (tokenizer, model)
+    return model_cache[model_name]
+
+def generate_embeddings(inputs: List[str], model_name: str):
+    # Load the tokenizer and model
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    model = AutoModel.from_pretrained(model_name, trust_remote_code=True)
+
+    embeddings = []
+    for i, text in enumerate(inputs):
+        # Tokenize the input text
+        tokenized_inputs = tokenizer(text, return_tensors="pt")
+
+        # Generate embeddings
+        with torch.no_grad():
+            outputs = model(**tokenized_inputs)
+            pooled_output = outputs.last_hidden_state[:, 0, :]  
+
+        # Convert embeddings to list format
+        embedding = pooled_output.squeeze().tolist()
+        embeddings.append({"embedding": embedding, "index": i})
+
+    return embeddings
+
+@app.post("/v1/embeddings")
+async def create_embeddings(data: dict):
+    try:
+        inputs = data["input"] if isinstance(data["input"], list) else [data["input"]]
+        model_name = data["model"]
+
+        # Generate embeddings
+        embeddings = generate_embeddings(inputs, model_name)
+
+        # Calculate usage metrics
+        usage = {"total_tokens": sum([len(input_text.split()) for input_text in inputs])}
+
+        return {
+            "object": "list",
+            "data": embeddings,
+            "model": model_name,
+            "usage": usage
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
