@@ -1,0 +1,9 @@
+fastapi[all]
+uvicorn
+python-multipart
+transformers
+pydantic
+tensorflow
+llama-cpp-python
+torch
+einops
