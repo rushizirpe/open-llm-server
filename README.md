@@ -73,7 +73,7 @@ curl http://localhost:8888/
     "gpu": "Available",
     "gpu_details": {
         "GPU 0": {
-            "compute_capability": (8, 9),
+            "compute_capability": "(8, 9)",
             "device_name": "NVIDIA L4"
             }
     }
@@ -100,8 +100,8 @@ curl http://localhost:8888/v1/embeddings \
 {
     "object": "list",
     "data": [
-        {"embedding": [...], "index": 0},
-        {"embedding": [...], "index": 1}
+        {"embedding": [0.56324344, 0.25775233, -0.123355], "index": 0},
+        {"embedding": [0.30823462, -0.23636326, 0.543345], "index": 1}
     ],
     "model": "nomic-ai/nomic-embed-text-v1.5",
     "usage": {"total_tokens": 5}
