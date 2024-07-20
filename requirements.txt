@@ -7,3 +7,4 @@ tensorflow
 llama-cpp-python
 torch
 einops
+graphrag
