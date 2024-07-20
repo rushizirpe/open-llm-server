@@ -7,6 +7,8 @@ import os
 import numpy as np
 import base64
 import logging
+import tensorflow as tf
+
 
 # Setup logging
 logging.basicConfig(level=logging.DEBUG)
