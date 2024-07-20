@@ -1,12 +1,13 @@
-version: '3.8'
+version: '3.3'
 
 services:
   app:
     build: .
     ports:
-      - "8888:8888"
+      - "${PORT:-8888}:${PORT:-8888}"
     environment:
       - ENV_VAR=value
+      - PORT=8888
     volumes:
-      - .:/app
-    command: ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8888"]
+      - .:/data
+    command: ["sh", "-c", "uvicorn app:app --host 0.0.0.0 --port ${PORT}"]
