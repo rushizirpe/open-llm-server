@@ -1,14 +1,15 @@
-from typing import List, Union, Any, Dict
-from transformers import AutoTokenizer, AutoModel, AutoModelForCausalLM
-from huggingface_hub import hf_hub_download
-from llama_cpp import Llama
-import tensorflow as tf
-from fastapi import FastAPI, HTTPException, Request
+from typing import List, Union
+from transformers import AutoTokenizer, AutoModelForCausalLM, AutoModel
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import torch
 import os
-import time
-import uuid
+import numpy as np
+import base64
+import logging
+
+# Setup logging
+logging.basicConfig(level=logging.DEBUG)
 
 # Get Hugging Face token set as an environment variable
 HUGGING_FACE_TOKEN = os.getenv("HUGGING_FACE_TOKEN")
@@ -36,6 +37,7 @@ model_cache = {}
 
 def get_model_and_tokenizer(model_name: str):
     if model_name not in model_cache:
+        logging.debug(f"Loading tokenizer and model for {model_name}")
         tokenizer = AutoTokenizer.from_pretrained(model_name, use_auth_token=HUGGING_FACE_TOKEN)
         model = AutoModelForCausalLM.from_pretrained(model_name, use_auth_token=HUGGING_FACE_TOKEN)
         if torch.cuda.is_available():
@@ -44,7 +46,7 @@ def get_model_and_tokenizer(model_name: str):
     return model_cache[model_name]
 
 def generate_embeddings(inputs: List[str], model_name: str):
-    # Load the tokenizer and model
+    logging.debug(f"Generating embeddings for model: {model_name}")
     tokenizer = AutoTokenizer.from_pretrained(model_name, use_auth_token=HUGGING_FACE_TOKEN)
     model = AutoModel.from_pretrained(model_name, trust_remote_code=True, use_auth_token=HUGGING_FACE_TOKEN)
     if torch.cuda.is_available():
@@ -52,33 +54,52 @@ def generate_embeddings(inputs: List[str], model_name: str):
 
     embeddings = []
     for i, text in enumerate(inputs):
-        # Tokenize the input text
+        if not isinstance(text, str):
+            logging.warning(f"Invalid input type at index {i}: {text} (type: {type(text)}). Converting to string.")
+            text = str(text)
+        logging.debug(f"Processing input {i}: {text}")
         tokenized_inputs = tokenizer(text, return_tensors="pt")
         if torch.cuda.is_available():
             tokenized_inputs = {key: val.to('cuda') for key, val in tokenized_inputs.items()}
 
-        # Generate embeddings
         with torch.no_grad():
             outputs = model(**tokenized_inputs)
             pooled_output = outputs.last_hidden_state[:, 0, :]
 
-        # Convert embeddings to list format
-        embedding = pooled_output.squeeze().tolist()
-        embeddings.append({"embedding": embedding, "index": i})
+        if pooled_output.shape[0] == 0:  
+            logging.warning(f"No valid embeddings for input {i}")
+            continue
+
+        embedding = pooled_output.squeeze().cpu().numpy()
+        try:
+            embedding_list = embedding.tolist()
+        except TypeError:  
+            base64_encoded = base64.b64encode(embedding).decode('utf-8')
+            embedding_list = base64.b64decode(base64_encoded)
+            embedding_list = np.frombuffer(embedding_list, dtype=np.float32).tolist()
+
+        embeddings.append({"embedding": embedding_list, "index": i})
 
     return embeddings
 
 @app.post("/v1/embeddings")
 async def create_embeddings(data: dict):
     try:
-        inputs = data["input"] if isinstance(data["input"], list) else [data["input"]]
+        inputs = data["input"]
         model_name = data["model"]
+        
+        # Convert all inputs to strings
+        if isinstance(inputs, list):
+            inputs = [str(input) for input in inputs]
+        else:
+            inputs = [str(inputs)]
 
-        # Generate embeddings
+        logging.debug(f"Received embedding request for model: {model_name} with inputs: {inputs}")
+
         embeddings = generate_embeddings(inputs, model_name)
-
-        # Calculate usage metrics
         usage = {"total_tokens": sum([len(input_text.split()) for input_text in inputs])}
+
+        logging.debug(f"Embeddings generated successfully: {embeddings}")
 
         return {
             "object": "list",
@@ -87,6 +108,7 @@ async def create_embeddings(data: dict):
             "usage": usage
         }
     except Exception as e:
+        logging.error(f"Error generating embeddings: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 class ChatCompletionInput(BaseModel):
@@ -101,9 +123,9 @@ class ChatCompletionInput(BaseModel):
 @app.post("/v1/chat/completions")
 async def create_chat_completion(data: ChatCompletionInput):
     try:
-        tokenizer, model = get_model_and_tokenizer(data.model)
+        logging.debug(f"Received chat completion request for model: {data.model}")
 
-        # Prepare the conversation history
+        tokenizer, model = get_model_and_tokenizer(data.model)
         conversation = ""
         for message in data.messages:
             role = message['role']
@@ -111,7 +133,6 @@ async def create_chat_completion(data: ChatCompletionInput):
             prefix = "User: " if role == "user" else "Assistant: "
             conversation += prefix + content + "\n"
 
-        # Generate chat completions
         input_ids = tokenizer.encode(conversation, return_tensors="pt")
         if torch.cuda.is_available():
             input_ids = input_ids.to('cuda')
@@ -132,6 +153,9 @@ async def create_chat_completion(data: ChatCompletionInput):
             response_text = response_text[len(conversation):] 
             responses.append({"index": i, "text": response_text})
 
+        logging.debug(f"Chat completion generated successfully: {responses}")
+
         return {"choices": responses}
     except Exception as e:
+        logging.error(f"Error generating chat completion: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
