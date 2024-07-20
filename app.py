@@ -1,6 +1,5 @@
-
 from typing import List, Union, Any, Dict
-from transformers import AutoTokenizer, AutoModel, AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoTokenizer, AutoModel, AutoModelForCausalLM
 from huggingface_hub import hf_hub_download
 from llama_cpp import Llama
 import tensorflow as tf
@@ -11,27 +10,8 @@ import os
 import time
 import uuid
 
-
-# Set the model repository and file
-GENERATIVE_AI_MODEL_REPO = "TheBloke/Llama-2-7B-GGUF"
-GENERATIVE_AI_MODEL_FILE = "llama-2-7b.Q4_K_M.gguf"
-
-# Download the model file
-model_path = hf_hub_download(
-    repo_id=GENERATIVE_AI_MODEL_REPO,
-    filename=GENERATIVE_AI_MODEL_FILE
-)
-
-# Load the model
-llama2_model = Llama(
-    model_path=model_path,
-    n_gpu_layers=64,
-    n_ctx=2000
-)
-
-# Test an inference
-# print(llama2_model(prompt="Hello ", max_tokens=10))
-
+# Get Hugging Face token set as an environment variable
+HUGGING_FACE_TOKEN = os.getenv("HUGGING_FACE_TOKEN")
 
 app = FastAPI()
 
@@ -52,30 +32,35 @@ def status_gpu_check():
         "gpu_details": gpu_details
     }
 
-
 model_cache = {}
 
 def get_model_and_tokenizer(model_name: str):
     if model_name not in model_cache:
-        tokenizer = AutoTokenizer.from_pretrained(model_name)
-        model = AutoModelForCausalLM.from_pretrained(model_name)
+        tokenizer = AutoTokenizer.from_pretrained(model_name, use_auth_token=HUGGING_FACE_TOKEN)
+        model = AutoModelForCausalLM.from_pretrained(model_name, use_auth_token=HUGGING_FACE_TOKEN)
+        if torch.cuda.is_available():
+            model.to('cuda')
         model_cache[model_name] = (tokenizer, model)
     return model_cache[model_name]
 
 def generate_embeddings(inputs: List[str], model_name: str):
     # Load the tokenizer and model
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModel.from_pretrained(model_name, trust_remote_code=True)
+    tokenizer = AutoTokenizer.from_pretrained(model_name, use_auth_token=HUGGING_FACE_TOKEN)
+    model = AutoModel.from_pretrained(model_name, trust_remote_code=True, use_auth_token=HUGGING_FACE_TOKEN)
+    if torch.cuda.is_available():
+        model.to('cuda')
 
     embeddings = []
     for i, text in enumerate(inputs):
         # Tokenize the input text
         tokenized_inputs = tokenizer(text, return_tensors="pt")
+        if torch.cuda.is_available():
+            tokenized_inputs = {key: val.to('cuda') for key, val in tokenized_inputs.items()}
 
         # Generate embeddings
         with torch.no_grad():
             outputs = model(**tokenized_inputs)
-            pooled_output = outputs.last_hidden_state[:, 0, :]  
+            pooled_output = outputs.last_hidden_state[:, 0, :]
 
         # Convert embeddings to list format
         embedding = pooled_output.squeeze().tolist()
@@ -128,6 +113,8 @@ async def create_chat_completion(data: ChatCompletionInput):
 
         # Generate chat completions
         input_ids = tokenizer.encode(conversation, return_tensors="pt")
+        if torch.cuda.is_available():
+            input_ids = input_ids.to('cuda')
         outputs = model.generate(
             input_ids,
             max_length=data.max_tokens + input_ids.shape[1],
@@ -142,7 +129,7 @@ async def create_chat_completion(data: ChatCompletionInput):
         responses = []
         for i in range(data.n):
             response_text = tokenizer.decode(outputs[i], skip_special_tokens=True)
-            response_text = response_text[len(conversation):]  # Remove the prompt part
+            response_text = response_text[len(conversation):] 
             responses.append({"index": i, "text": response_text})
 
         return {"choices": responses}
