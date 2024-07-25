@@ -4,7 +4,7 @@ services:
   app:
     build: .
     ports:
-      - "${PORT:-8888}:${PORT:-8888}"
+      - "${PORT:-8888}:${PORT:-8888}" 
     environment:
       - ENV_VAR=value
       - PORT=8888
