@@ -46,10 +46,13 @@ python launch.py start --host 0.0.0.0 --port 8888 --reload
 ```
 
 -  ### DockerHub
+
 ```sh
 # Pull Docker Image
 docker pull thisisrishi/open-llm-server
+```
 
+```sh
 # Run Docker
 docker run -it -p 8888:8888 thisisrishi/open-llm-server:latest
 ```
@@ -57,6 +60,11 @@ OR
 ```sh
 # Run on Custom Port
 docker run -e PORT=8000 -p 8000:8000 thisisrishi/open-llm-server:latest
+```
+OR
+```sh
+# Create and Start Container
+docker compose up
 ```
 &zwj;
 # **Endpoints**
