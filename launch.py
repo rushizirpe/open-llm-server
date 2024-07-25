@@ -29,14 +29,12 @@ def start_server(host, port, reload):
     if reload:
         uvicorn_command.append('--reload')
 
-    subprocess.run(uvicorn_command)
-    
-    # subprocess.Popen(uvicorn_command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    # process = subprocess.Popen(uvicorn_command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    process = subprocess.Popen(uvicorn_command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
-    # output, _ = process.communicate()  # Wait for the process to complete and capture output
-    # if process.returncode != 0:
-    #     print(f"Server startup error: {output.decode('utf-8')}")
+    # Wait for the process to complete and capture output
+    output, _ = process.communicate()  
+    if process.returncode != 0:
+        print(f"Server startup error: {output.decode('utf-8')}")
     
     timer = 0
     while timer < 600:
