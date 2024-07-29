@@ -21,11 +21,6 @@ RUN apt-get update && apt-get install -y \
 RUN pip install --upgrade pip \
     && pip install -r requirements.txt
 
-# Download the model file
-# RUN python -c "\
-# from huggingface_hub import hf_hub_download; \
-# hf_hub_download(repo_id='TheBloke/Llama-2-7B-GGUF', filename='llama-2-7b.Q4_K_M.gguf')"
-
 # Expose the port the app runs on
 EXPOSE 8888
 
