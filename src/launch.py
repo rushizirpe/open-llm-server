@@ -48,7 +48,8 @@ def start_server(host, port, reload):
     while timer < 600:
         try:
             requests.get(f'http://{host}:{port}')
-        except requests.ConnectionError:
+        except requests.ConnectionError as e:
+            # print(e)
             time.sleep(1)
             timer += 1
             print(f"Elapsed Time: {timer} seconds", end = "\r")
