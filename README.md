@@ -24,7 +24,10 @@ This Open LLM Framework serves as a powerful and flexible tool for generating te
 - Enables control over the computational resources used, optimizing for cost and performance.
 
 &zwj;
-
+# **Notebooks**
+For GraphRAG:  
+- [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1uhFDnih1WKrSRQHisU-L6xw6coapgR51?usp=sharing.)
+- More Coming Soon...
 # **Usage**
 - ### Prerequisites
 
