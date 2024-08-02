@@ -25,4 +25,4 @@ RUN pip install --upgrade pip \
 EXPOSE 8888
 
 # Command to run the app
-CMD ["uvicorn", "src.app:app", "--host", "127.0.0.1", "--port", "8888"]
+CMD ["uvicorn", "src.app:app", "--host", "0.0.0.0", "--port", "8888"]
