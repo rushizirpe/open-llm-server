@@ -45,7 +45,7 @@ cd open-llm-server
 pip install -r requirements.txt
 
 #  Launch server
-python launch.py start --host 0.0.0.0 --port 8888 --reload
+python src/launch.py start --host 127.0.0.1 --port 8888 --reload
 ```
 
 -  ### DockerHub
@@ -159,7 +159,7 @@ curl http://localhost:8888/v1/chat/completions \
 ```json
 {
     "choices": [
-        {"index": 0, "text": "I can help you with a variety of tasks, such as ..."}
+        {"index": 0, "text": "Hello, I can help you with a variety of tasks, such as ..."}
     ]
 }
 ```
