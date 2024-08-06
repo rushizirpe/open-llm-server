@@ -45,7 +45,7 @@ cd open-llm-server
 pip install -r requirements.txt
 
 #  Launch server
-python src/launch.py start --host 127.0.0.1 --port 8888 --reload
+python scripts/launch.py start --host 127.0.0.1 --port 8888 --reload
 ```
 
 -  ### DockerHub
