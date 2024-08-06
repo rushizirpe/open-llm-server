@@ -4,6 +4,7 @@ python-multipart
 transformers
 pydantic
 tensorflow
+requests
 llama-cpp-python
 torch
 einops
