@@ -4,7 +4,7 @@ pydantic
 pydantic-settings
 torch
 transformers
-# tensorflow
+einops
 requests
 python-dotenv
 numpy==1.23.5
