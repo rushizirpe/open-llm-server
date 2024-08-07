@@ -30,12 +30,16 @@ def start_server(host, port, reload):
     if reload:
         uvicorn_command.append('--reload')
         
-    process = subprocess.Popen(
-        uvicorn_command,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL
-    )
-    
+    # Define log file path
+    log_file = 'server.log'
+
+    with open(log_file, 'a') as log:
+        process = subprocess.Popen(
+            uvicorn_command,
+            stdout=log,
+            stderr=log
+        )
+        
     timer = 0
     while timer < 600:
         try:
