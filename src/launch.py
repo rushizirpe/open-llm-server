@@ -11,9 +11,11 @@ def parse_arguments():
     parser.add_argument('--host', type=str, default='127.0.0.1', help='Host IP address to bind')
     parser.add_argument('--port', type=int, default=8888, help='Port number to bind')
     parser.add_argument('--reload', action='store_true', help='Enable auto-reload (for start)')
+    parser.add_argument('--mode', choices=['attached', 'detached'], default='attached', help='Run mode: attached or detached')
+
     return parser.parse_args()
 
-def start_server(host, port, reload):
+def start_server(host, port, reload, mode):
     print("Server is Starting Up...")
     try:
         requests.get(f'http://{host}:{port}')
@@ -30,26 +32,28 @@ def start_server(host, port, reload):
     if reload:
         uvicorn_command.append('--reload')
         
-    # uvicorn_command.append(">/dev/null")
-    # subprocess.run(uvicorn_command)
-    process = subprocess.Popen(
-        uvicorn_command,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL
-    )
-    # process = subprocess.Popen(uvicorn_command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-
-    # Wait for the process to complete and capture output
-    # output, _ = process.communicate()  
-    # if process.returncode != 0:
-    #     print(f"Server startup error: {output.decode('utf-8')}")
+    if mode == 'detached':
+        process = subprocess.Popen(
+            uvicorn_command,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            start_new_session=True 
+        )
+        print("Server started in detached mode.")
+    else:
+        process = subprocess.Popen(
+            uvicorn_command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
+        print("Server started in attached mode.")
+        
     
     timer = 0
     while timer < 600:
         try:
             requests.get(f'http://{host}:{port}')
         except requests.ConnectionError as e:
-            # print(e)
             time.sleep(1)
             timer += 1
             print(f"Elapsed Time: {timer} seconds", end = "\r")
@@ -57,11 +61,12 @@ def start_server(host, port, reload):
             print("Server started successfully.")
             return
 
+    process.terminate()
     print("Error: Server startup timed out. Took more than 10 minutes.")
 
 def stop_server():
     try:
-        # Find the PID of the Python process running the server
+        # Get PID of the Python process running the server
         print("Searching for running Python processes...")
         result = subprocess.run(
             ['tasklist', '/FO', 'CSV'],
@@ -69,27 +74,22 @@ def stop_server():
             text=True
         )
 
-        # Check if the command executed successfully
         if result.returncode != 0:
             print("Error executing tasklist command.")
             return
-
-        # Split the output into lines
         processes = result.stdout.splitlines()
         
-        # Look for the python process running the server
+        # Kill the process
         for line in processes:
             if 'python.exe' in line:
-                # Extract PID from the CSV format
                 pid = line.split(',')[1].strip('"')
                 print(f"Found Python process with PID: {pid}. Stopping the server...")
                 
-                # Kill the process
                 subprocess.run(['taskkill', '/PID', pid, '/F'])
                 print("Server stopped successfully.")
                 return
         
-        print("No running Python server process found.")
+        print("No running server process found.")
         
     except Exception as e:
         print(f"An error occurred while trying to stop the server: {e}")
@@ -104,12 +104,21 @@ def check_server_status(host, port):
     except requests.ConnectionError:
         print("Server is not running or could not be reached.")
 
-if __name__ == '__main__':
+def main():
     args = parse_arguments()
 
-    if args.action == 'start':
-        start_server(args.host, args.port, args.reload)
-    elif args.action == 'stop':
-        stop_server()
-    elif args.action == 'status':
-        check_server_status(args.host, args.port)
+    actions = {
+        'start': lambda: start_server(args.host, args.port, args.reload),
+        'stop': stop_server,
+        'status': lambda: check_server_status(args.host, args.port)
+    }
+
+    action = actions.get(args.action)
+    if action:
+        action()
+    else:
+        print(f"Unknown action: {args.action}")
+
+if __name__ == '__main__':
+    main()
+
