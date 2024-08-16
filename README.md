@@ -4,7 +4,7 @@
 ![Python](https://img.shields.io/badge/Python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)&nbsp;&nbsp;
 ![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)&nbsp;&nbsp;
 ![Git](https://img.shields.io/badge/Git-grey?style=for-the-badge&logo=git)&nbsp;&nbsp;
-![Licence](https://img.shields.io/github/license/rushizirpe/open-llm-server?style=for-the-badge&)&nbsp;&nbsp;
+![License](https://img.shields.io/github/license/rushizirpe/open-llm-server?style=for-the-badge)&nbsp;&nbsp;
 ![Issues](https://img.shields.io/github/issues/rushizirpe/open-llm-server?style=for-the-badge&)&nbsp;&nbsp;
 
 # Open LLM
