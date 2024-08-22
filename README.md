@@ -43,10 +43,10 @@ git clone https://github.com/rushizirpe/open-llm-server.git
 
 # Install Dependencies
 cd open-llm-server
-pip install -r requirements.txt
+pip install -e .
 
 #  Launch server
-python scripts/launch.py start --host 127.0.0.1 --port 8888 --reload
+llm-server start --host 127.0.0.1 --port 8888 --reload
 ```
 
 Params:
