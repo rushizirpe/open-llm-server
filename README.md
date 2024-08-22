@@ -7,6 +7,7 @@
 ![License](https://img.shields.io/github/license/rushizirpe/open-llm-server?style=for-the-badge)&nbsp;&nbsp;
 ![Issues](https://img.shields.io/github/issues/rushizirpe/open-llm-server?style=for-the-badge&)&nbsp;&nbsp;
 
+
 # Open LLM
 
 This Open LLM Framework serves as a powerful and flexible tool for generating text embeddings and chat completions using state-of-the-art and open source language models. By leveraging models Transformers, this enables various natural language processing (NLP) tasks to be performed via simple HTTP endpoints similar to openai endpoints.
@@ -47,6 +48,20 @@ pip install -r requirements.txt
 #  Launch server
 python scripts/launch.py start --host 127.0.0.1 --port 8888 --reload
 ```
+
+Params:
+- `start`: Start the server
+- `stop`: Stop the server
+- `status`: Check the server status
+- `--host`: Specify the host IP (default: 127.0.0.1)
+- `--port`: Specify the port number (default: 8888)
+- `--reload`: Enable auto-reload for development
+
+### API Endpoints
+
+1. Chat Completions: `/v1/chat/completions`
+2. Embeddings: `/v1/embeddings`
+3. System Metrics: `/v1/metrics`
 
 -  ### DockerHub
 
