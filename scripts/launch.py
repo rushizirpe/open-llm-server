@@ -93,7 +93,7 @@ def check_server_status(host, port):
     except requests.ConnectionError:
         print("Server is not running or could not be reached.")
 
-if __name__ == '__main__':
+def main():
     args = parse_arguments()
 
     if args.action == 'start':
@@ -102,3 +102,6 @@ if __name__ == '__main__':
         stop_server()
     elif args.action == 'status':
         check_server_status(args.host, args.port)
+
+if __name__ == '__main__':
+    main()
