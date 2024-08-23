@@ -10,3 +10,6 @@ from src.core.logging import logger
 from src.core.config import settings
 
 router = APIRouter()
+
+def get_job_id():
+    return f"job_{len(os.listdir(settings.JOB_DIR)) + 1}"
