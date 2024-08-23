@@ -11,6 +11,15 @@ from src.core.config import settings
 
 router = APIRouter()
 
+class FineTuneInput(BaseModel):
+    model: str
+    train_file: str
+    validation_file: Optional[str] = None
+    num_train_epochs: int = 3
+    learning_rate: float = 2e-5
+    batch_size: int = 8
+    output_dir: str = "fine_tuned_model"
+
 def get_job_id():
     return f"job_{len(os.listdir(settings.JOB_DIR)) + 1}"
 
