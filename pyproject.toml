@@ -24,7 +24,6 @@ pytest = "^6.2.5"
 
 [tool.poetry.scripts]
 llm-server = "scripts.launch:main"
-llm-fine-tune = "scripts.fine_tune_cli:main"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
