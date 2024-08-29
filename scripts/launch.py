@@ -33,6 +33,7 @@ def start_server(host, port, reload):
         
     # Define log file path
     log_file = 'server.log'
+    pid_file = 'server.pid'
 
     with open(log_file, 'a') as log:
         process = subprocess.Popen(
@@ -40,6 +41,9 @@ def start_server(host, port, reload):
             stdout=log,
             stderr=log
         )
+        with open(pid_file, 'w') as pid:
+            pid.write(str(process.pid))
+
         
     timer = 0
     while timer < 600:
@@ -58,6 +62,18 @@ def start_server(host, port, reload):
 def stop_server():
     current_os = platform.system()
     try:
+        if os.path.exists("server.pid"):
+            with open("server.pid", 'r') as pid_file:
+                pid = int(pid_file.read().strip())
+                print(f"Found server process with PID: {pid} via server.pid file. Stopping the server...")
+                if current_os == "Windows":
+                    subprocess.run(["taskkill", "/PID", pid, "/F"])
+                else:
+                    os.kill(int(pid), signal.SIGTERM)
+
+                print("Server stopped successfully.")
+                return
+
         if current_os == "Windows":
             print("Searching for running Python processes on Windows system...")
             result = subprocess.run(
