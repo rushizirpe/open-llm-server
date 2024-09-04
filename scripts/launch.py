@@ -4,6 +4,7 @@ import argparse
 import requests
 import os
 import signal
+import platform
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description='Manage server startup and status.')
@@ -32,6 +33,7 @@ def start_server(host, port, reload):
         
     # Define log file path
     log_file = 'server.log'
+    pid_file = 'server.pid'
 
     with open(log_file, 'a') as log:
         process = subprocess.Popen(
@@ -39,6 +41,9 @@ def start_server(host, port, reload):
             stdout=log,
             stderr=log
         )
+        with open(pid_file, 'w') as pid:
+            pid.write(str(process.pid))
+
         
     timer = 0
     while timer < 600:
@@ -55,13 +60,34 @@ def start_server(host, port, reload):
     print("Error: Server startup timed out. Took more than 10 minutes.")
 
 def stop_server():
+    current_os = platform.system()
     try:
-        print("Searching for running Python processes...")
-        result = subprocess.run(
-            ['tasklist', '/FO', 'CSV'],
-            capture_output=True,
-            text=True
-        )
+        if os.path.exists("server.pid"):
+            with open("server.pid", 'r') as pid_file:
+                pid = int(pid_file.read().strip())
+                print(f"Found server process with PID: {pid} via server.pid file. Stopping the server...")
+                if current_os == "Windows":
+                    subprocess.run(["taskkill", "/PID", pid, "/F"])
+                else:
+                    os.kill(int(pid), signal.SIGTERM)
+
+                print("Server stopped successfully.")
+                return
+
+        if current_os == "Windows":
+            print("Searching for running Python processes on Windows system...")
+            result = subprocess.run(
+                ['tasklist', '/FO', 'CSV'],
+                capture_output=True,
+                text=True
+            )
+        else:
+            print(
+                "Searching for running Python processes on Unix-like system..."
+            )
+            result = subprocess.run(
+                ["ps", "-aux"], capture_output=True, text=True
+            )
 
         if result.returncode != 0:
             print("Error executing tasklist command.")
@@ -70,11 +96,19 @@ def stop_server():
         processes = result.stdout.splitlines()
         
         for line in processes:
-            if 'python.exe' in line:
-                pid = line.split(',')[1].strip('"')
+            if "python" in line and "uvicorn" in line:
+                if current_os == "Windows":
+                    pid = line.split(",")[1].strip('"')
+                else:
+                    pid = line.split()[1]
+
                 print(f"Found Python process with PID: {pid}. Stopping the server...")
-                
-                subprocess.run(['taskkill', '/PID', pid, '/F'])
+
+                if current_os == "Windows":
+                    subprocess.run(["taskkill", "/PID", pid, "/F"])
+                else:
+                    os.kill(int(pid), signal.SIGTERM)
+
                 print("Server stopped successfully.")
                 return
         
